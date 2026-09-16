@@ -118,9 +118,7 @@ Where:
 
 Here is a structured, bulleted response in English that you can use or adapt directly for your assignment submission:
 
----
-
-## How to Mitigate Downtime
+## 🆙 How to Mitigate Downtime
 
 To ensure high availability and prevent downtime for DeFi protocols, mitigation strategies must be applied across all key layers of the stack:
 
@@ -129,22 +127,16 @@ To ensure high availability and prevent downtime for DeFi protocols, mitigation 
 - **Multi-RPC Failover Strategy:** Implement automated fallback logic in the client/frontend. If the primary RPC provider (e.g., Triton, Helius, QuickNode, Alchemy) experiences an outage or rate-limiting, the application automatically switches to secondary and tertiary providers.
 - **Load Balancing & Caching:** Distribute read requests across multiple RPC nodes and cache non-critical state data locally to reduce direct RPC load.
 
----
-
 #### 2. Frontend Availability & Decentralization
 
 - **Decentralized Hosting:** Deploy the frontend to decentralized storage networks such as **IPFS** or **Arweave** linked to decentralized domain systems (ENS / SNS). This prevents single points of failure from traditional web hosts (AWS, Vercel, Cloudflare).
 - **Open-Source & Self-Hosting Support:** Maintain an open-source frontend repository allowing users and third parties to build and run the interface locally or host backup mirrors in the event of an official site outage.
-
----
 
 #### 3. Program & Oracle Reliability
 
 - **Oracle Redundancy & TWAP Fallbacks:** If the CPMM or DeFi protocol relies on external price feeds, integrate redundant oracle providers (e.g., Pyth + Chainlink) and implement on-chain Time-Weighted Average Price (TWAP) fallbacks if external oracle feeds freeze or fail.
 - **Non-Blocking Architecture:** Avoid single-point emergency pause functions (`pause()` or single admin keys) that could permanently lock protocol funds if admin keys are compromised or inaccessible during network emergencies.
 - **Graceful Degradation:** Design instructions so that if a non-critical Cross-Program Invocation (CPI) or external module fails, core protocol functions (e.g., basic swaps or liquidity removals) remain functional.
-
----
 
 #### 4. Network Congestion & Execution Reliability
 
