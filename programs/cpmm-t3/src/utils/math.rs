@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{constants::MINIMUM_LIQUIDITY, error::CpmmError};
+use crate::{constants::MINIMUM_LIQUIDITY, error::CpmmError, SwapParams};
 
 /// Calculates the initial liquidity tokens to mint for a liquidity pool.
 ///
@@ -293,7 +293,7 @@ pub fn calculate_claimable_amount(lp_amount: u64, lp_supply: u64, reserve: u64) 
         .map_err(|_| CpmmError::MathUnderflow)?)
 }
 
-/* pub fn calculate_swap_amounts(
+pub fn calculate_swap_amounts(
     swap_params: &SwapParams,
     reserve_input: u64,
     reserve_output: u64,
@@ -416,4 +416,3 @@ pub fn calculate_claimable_amount(lp_amount: u64, lp_supply: u64, reserve: u64) 
         }
     }
 }
- */

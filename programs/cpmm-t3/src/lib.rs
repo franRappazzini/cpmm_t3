@@ -39,4 +39,12 @@ pub mod cpmm_t3 {
     pub fn redeem_lp(ctx: Context<RedeemLp>, pool_id: u64, lp_amount: u64) -> Result<()> {
         ctx.accounts.process_ix(pool_id, lp_amount)
     }
+
+    pub fn swap(ctx: Context<Swap>, pool_id: u64, params: SwapParams) -> Result<()> {
+        ctx.accounts.process_ix(pool_id, params)
+    }
+
+    pub fn withdraw_treasury(ctx: Context<WithdrawTreasury>, pool_id: u64) -> Result<()> {
+        ctx.accounts.process_ix(pool_id)
+    }
 }
