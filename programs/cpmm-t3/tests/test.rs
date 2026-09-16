@@ -5,8 +5,8 @@ use {
     anchor_lang::{prelude::Pubkey, solana_program::instruction::Instruction},
     anchor_spl::associated_token,
     litesvm::LiteSVM,
-    litesvm_token::{spl_token, CreateMint},
-    solana_keypair::Keypair,
+    litesvm_token::{spl_token, CreateAssociatedTokenAccount, CreateMint, MintTo},
+    solana_keypair::{Address, Keypair},
     solana_message::{Message, VersionedMessage},
     solana_signer::Signer,
     solana_transaction::versioned::VersionedTransaction,
@@ -72,7 +72,7 @@ fn pdas() -> (Pubkey, Pubkey) {
 }
 
 fn mints(
-    mut svm: &mut LiteSVM,
+    svm: &mut LiteSVM,
     creator: &Keypair,
     liquidity_pool: &Pubkey,
 ) -> (
@@ -86,32 +86,47 @@ fn mints(
     Pubkey,
     Pubkey,
 ) {
-    let mint_a = CreateMint::new(&mut svm, &creator)
+    let mint_a = CreateMint::new(svm, &creator)
         .decimals(6)
         .authority(&creator.pubkey())
         .send()
         .unwrap();
 
-    let mint_b = CreateMint::new(&mut svm, &creator)
+    let mint_b = CreateMint::new(svm, &creator)
         .decimals(6)
         .authority(&creator.pubkey())
         .send()
         .unwrap();
 
-    let lp_mint = CreateMint::new(&mut svm, &creator)
-        .decimals(6)
-        .authority(&creator.pubkey())
-        .send()
-        .unwrap();
+    let lp_mint = Address::find_program_address(
+        &[cpmm_t3::constants::LP_MINT_SEED, &0u64.to_le_bytes()],
+        &cpmm_t3::id(),
+    )
+    .0;
 
     let vault_a = associated_token::get_associated_token_address(liquidity_pool, &mint_a);
     let vault_b = associated_token::get_associated_token_address(liquidity_pool, &mint_b);
     let vault_lp = associated_token::get_associated_token_address(liquidity_pool, &lp_mint);
 
-    let creator_ata_a = associated_token::get_associated_token_address(&creator.pubkey(), &mint_a);
-    let creator_ata_b = associated_token::get_associated_token_address(&creator.pubkey(), &mint_b);
+    let creator_ata_a = CreateAssociatedTokenAccount::new(svm, &creator, &mint_a)
+        .owner(&creator.pubkey())
+        .send()
+        .unwrap();
+    let creator_ata_b = CreateAssociatedTokenAccount::new(svm, &creator, &mint_b)
+        .owner(&creator.pubkey())
+        .send()
+        .unwrap();
     let creator_ata_lp =
         associated_token::get_associated_token_address(&creator.pubkey(), &lp_mint);
+
+    MintTo::new(svm, &creator, &mint_a, &creator_ata_a, 1_000_000_000)
+        .owner(&creator)
+        .send()
+        .unwrap();
+    MintTo::new(svm, &creator, &mint_b, &creator_ata_b, 2_000_000_000)
+        .owner(&creator)
+        .send()
+        .unwrap();
 
     (
         mint_a,
@@ -134,7 +149,6 @@ fn initialize() {
 
     let ix = create_initialixe_ix(&authority, global_config);
     let sig = send_tx(&mut svm, &[ix], &authority, &[&authority]);
-    println!("{:#?}", sig);
     assert!(sig.is_ok());
 }
 
@@ -175,8 +189,7 @@ fn create_pool() {
         20_000_000,
     );
 
-    let sig = send_tx(&mut svm, &[ix1, ix2], &creator, &[&creator]);
-    println!("{:#?}", sig);
+    let sig = send_tx(&mut svm, &[ix1, ix2], &authority, &[&authority, &creator]);
     assert!(sig.is_ok());
 }
 
@@ -234,8 +247,12 @@ fn add_liquidity() {
         0,
     );
 
-    let sig = send_tx(&mut svm, &[ix1, ix2, ix3], &creator, &[&creator]);
-    println!("{:#?}", sig);
+    let sig = send_tx(
+        &mut svm,
+        &[ix1, ix2, ix3],
+        &creator,
+        &[&authority, &creator],
+    );
     assert!(sig.is_ok());
 }
 
@@ -293,6 +310,15 @@ fn redeem_lp() {
         0,
     );
 
+    // first send these ix because we want to obtain the creator_ata_lp account before
+    let sig = send_tx(
+        &mut svm,
+        &[ix1, ix2, ix3],
+        &creator,
+        &[&authority, &creator],
+    );
+    assert!(sig.is_ok());
+
     let creator_ata_lp_account: spl_token::state::Account =
         litesvm_token::get_spl_account(&svm, &creator_ata_lp).unwrap();
 
@@ -311,7 +337,6 @@ fn redeem_lp() {
         creator_ata_lp_account.amount / 2,
     );
 
-    let sig = send_tx(&mut svm, &[ix1, ix2, ix3, ix4], &creator, &[&creator]);
-    println!("{:#?}", sig);
+    let sig = send_tx(&mut svm, &[ix4], &creator, &[&creator]);
     assert!(sig.is_ok());
 }

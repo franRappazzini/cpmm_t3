@@ -7,7 +7,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-cpmm_t3 = "GtHBQe4Ggju6o2AeRUimVcxFt2SRUz4dictcjeyQUcoV"
+cpmm_t3 = "H2x2uMrSpkaPgkDViEwMiJ2JkmTsuxXqoEtsz2Recf21"
 
 [provider]
 cluster = "localnet"

@@ -10,7 +10,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use states::*;
 
-declare_id!("GtHBQe4Ggju6o2AeRUimVcxFt2SRUz4dictcjeyQUcoV");
+declare_id!("H2x2uMrSpkaPgkDViEwMiJ2JkmTsuxXqoEtsz2Recf21");
 
 #[program]
 pub mod cpmm_t3 {
